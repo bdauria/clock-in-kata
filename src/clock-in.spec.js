@@ -5,7 +5,7 @@ const { TestScheduler, Observable } = require('rxjs');
 
 const backend = require('./backend');
 const { commitTime } = require('./backend');
-const { clockIn, clockInWithPosition } = require('./clock');
+const { clockIn, clockInWithPosition } = require('./clock-in');
 
 const user = 'Socrates';
 
@@ -50,7 +50,7 @@ describe('time tracking', () => {
       });
 
       context('server is not available', () => {
-        it('should report an error', () => {
+        it('should report an error', done => {
           // stubout the result of getPosition with a success response
           // stubout the result Observable of comitTime with an error
           // assert
