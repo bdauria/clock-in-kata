@@ -16,6 +16,7 @@ function clockIn(user) {
 function clockInWithPosition(user) {
   return backend
     .getPosition()
+    .retry(3)
     .switchMap(position => backend.commitTime(user, position))
     .map(_ => `${user} has been clocked in.`)
     .catch(_ => clockIn(user).map(result => result + ' Without GPS though'));

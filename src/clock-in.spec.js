@@ -95,10 +95,19 @@ describe('time tracking', () => {
 
       context('when the GPS is available only at the third attempt', () => {
         it('should clock in', done => {
-          // create a deferred Observable by composing 3 failures, followed by one success
-          // stubout the result of getPosition using the previously created stream
-          // stubout the result Observable of comitTime with a success response
-          // assert
+          const marbles$ = ['---#', '---#', '---#', '-a'].map(marble =>
+            testScheduler.createColdObservable(marble)
+          );
+          const source$ = Observable.defer(() => marbles$.shift());
+          getPosition.returns(source$);
+          commitTime.returns(testScheduler.createColdObservable('-a'));
+
+          clockInWithPosition(user).subscribe(value => {
+            expect(value).to.equal('Socrates has been clocked in.');
+            done();
+          });
+
+          testScheduler.flush();
         });
       });
     });
