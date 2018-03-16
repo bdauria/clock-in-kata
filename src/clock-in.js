@@ -14,5 +14,8 @@ function clockIn(user) {
 }
 
 function clockInWithPosition(user) {
-  // TODO
+  return backend
+    .getPosition()
+    .switchMap(position => backend.commitTime(user, position))
+    .catch(_ => clockIn(user).map(result => result + ' Without GPS though'));
 }

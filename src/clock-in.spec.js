@@ -55,17 +55,28 @@ describe('time tracking', () => {
     context('GPS is not available', () => {
       context('server is available', () => {
         it('should clock in, without GPS data', done => {
-          // stubout the result of getPosition with an error
-          // stubout the result Observable of comitTime with a success response
-          // assert
+          getPosition.returns(testScheduler.createColdObservable('-#'));
+          commitTime.returns(testScheduler.createColdObservable('-a'));
+
+          clockInWithPosition(user).subscribe(value => {
+            expect(value).to.equal(
+              'Socrates has been clocked in. Without GPS though'
+            );
+            done();
+          });
+
+          testScheduler.flush();
         });
       });
 
       context('server is not available', () => {
-        it('should report an error', done => {
-          // stubout the result of getPosition with a success response
-          // stubout the result Observable of comitTime with an error
-          // assert
+        it('sholud report an error', () => {
+          getPosition.returns(testScheduler.createColdObservable('-#'));
+          commitTime.returns(testScheduler.createColdObservable('-#'));
+
+          clockInWithPosition(user).subscribe(value => {
+            expect(value).to.equal('error from server');
+          });
         });
       });
     });
