@@ -7,7 +7,10 @@ module.exports = {
 };
 
 function clockIn(user) {
-  // TODO
+  return backend
+    .commitTime(user)
+    .map(_ => `${user} has been clocked in.`)
+    .catch(_ => Observable.of('error from the server'));
 }
 
 function clockInWithPosition(user) {

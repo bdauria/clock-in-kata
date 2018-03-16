@@ -26,15 +26,27 @@ describe('time tracking', () => {
   context('when GPS is not required', () => {
     context('when service is available', () => {
       it('should clock in the user', done => {
-        // stubout the result Observable of comitTime with a success response
-        // assert
+        commitTime.returns(testScheduler.createColdObservable('-a'));
+
+        clockIn(user).subscribe(value => {
+          expect(value).to.equal('Socrates has been clocked in.');
+          done();
+        });
+
+        testScheduler.flush();
       });
     });
 
     context('when server is unavailable', () => {
       it('should report an error', done => {
-        // stubout the result Observable of comitTime with an error
-        // assert
+        commitTime.returns(testScheduler.createColdObservable('-#'));
+
+        clockIn(user).subscribe(value => {
+          expect(value).to.equal('error from the server');
+          done();
+        });
+
+        testScheduler.flush();
       });
     });
   });
