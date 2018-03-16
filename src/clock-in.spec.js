@@ -83,18 +83,23 @@ describe('time tracking', () => {
 
     context('GPS is available', () => {
       it('should clock in', done => {
-        // stubout the result of getPosition with a success response
-        // stubout the result Observable of comitTime with a success response
-        // assert
-      });
-    });
+        getPosition.returns(testScheduler.createColdObservable('-a'));
+        commitTime.returns(testScheduler.createColdObservable('-a'));
 
-    context('when the GPS is available only at the third attempt', () => {
-      it('should clock in', done => {
-        // create a deferred Observable by composing 3 failures, followed by one success
-        // stubout the result of getPosition using the previously created stream
-        // stubout the result Observable of comitTime with a success response
-        // assert
+        clockInWithPosition(user).subscribe(value => {
+          expect(value).to.equal('Socrates has been clocked in.');
+          done();
+        });
+        testScheduler.flush();
+      });
+
+      context('when the GPS is available only at the third attempt', () => {
+        it('should clock in', done => {
+          // create a deferred Observable by composing 3 failures, followed by one success
+          // stubout the result of getPosition using the previously created stream
+          // stubout the result Observable of comitTime with a success response
+          // assert
+        });
       });
     });
   });
