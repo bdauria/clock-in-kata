@@ -7,9 +7,17 @@ module.exports = {
 };
 
 function clockIn(user) {
-  // TODO
+  return backend
+    .commitTime(user)
+    .map(_ => `${user} has been clocked in.`)
+    .catch(_ => Observable.of('error from the server'));
 }
 
 function clockInWithPosition(user) {
-  // TODO
+  return backend
+    .getPosition()
+    .retry(3)
+    .switchMap(position => backend.commitTime(user, position))
+    .map(_ => `${user} has been clocked in.`)
+    .catch(_ => clockIn(user).map(result => result + ' Without GPS though'));
 }

@@ -26,15 +26,27 @@ describe('time tracking', () => {
   context('when GPS is not required', () => {
     context('when service is available', () => {
       it('should clock in the user', done => {
-        // stubout the result Observable of comitTime with a success response
-        // assert
+        commitTime.returns(testScheduler.createColdObservable('-a'));
+
+        clockIn(user).subscribe(value => {
+          expect(value).to.equal('Socrates has been clocked in.');
+          done();
+        });
+
+        testScheduler.flush();
       });
     });
 
     context('when server is unavailable', () => {
       it('should report an error', done => {
-        // stubout the result Observable of comitTime with an error
-        // assert
+        commitTime.returns(testScheduler.createColdObservable('-#'));
+
+        clockIn(user).subscribe(value => {
+          expect(value).to.equal('error from the server');
+          done();
+        });
+
+        testScheduler.flush();
       });
     });
   });
@@ -43,35 +55,60 @@ describe('time tracking', () => {
     context('GPS is not available', () => {
       context('server is available', () => {
         it('should clock in, without GPS data', done => {
-          // stubout the result of getPosition with an error
-          // stubout the result Observable of comitTime with a success response
-          // assert
+          getPosition.returns(testScheduler.createColdObservable('-#'));
+          commitTime.returns(testScheduler.createColdObservable('-a'));
+
+          clockInWithPosition(user).subscribe(value => {
+            expect(value).to.equal(
+              'Socrates has been clocked in. Without GPS though'
+            );
+            done();
+          });
+
+          testScheduler.flush();
         });
       });
 
       context('server is not available', () => {
-        it('should report an error', done => {
-          // stubout the result of getPosition with a success response
-          // stubout the result Observable of comitTime with an error
-          // assert
+        it('sholud report an error', () => {
+          getPosition.returns(testScheduler.createColdObservable('-#'));
+          commitTime.returns(testScheduler.createColdObservable('-#'));
+
+          clockInWithPosition(user).subscribe(value => {
+            expect(value).to.equal('error from server');
+          });
         });
       });
     });
 
     context('GPS is available', () => {
       it('should clock in', done => {
-        // stubout the result of getPosition with a success response
-        // stubout the result Observable of comitTime with a success response
-        // assert
-      });
-    });
+        getPosition.returns(testScheduler.createColdObservable('-a'));
+        commitTime.returns(testScheduler.createColdObservable('-a'));
 
-    context('when the GPS is available only at the third attempt', () => {
-      it('should clock in', done => {
-        // create a deferred Observable by composing 3 failures, followed by one success
-        // stubout the result of getPosition using the previously created stream
-        // stubout the result Observable of comitTime with a success response
-        // assert
+        clockInWithPosition(user).subscribe(value => {
+          expect(value).to.equal('Socrates has been clocked in.');
+          done();
+        });
+        testScheduler.flush();
+      });
+
+      context('when the GPS is available only at the third attempt', () => {
+        it('should clock in', done => {
+          const marbles$ = ['---#', '---#', '---#', '-a'].map(marble =>
+            testScheduler.createColdObservable(marble)
+          );
+          const source$ = Observable.defer(() => marbles$.shift());
+          getPosition.returns(source$);
+          commitTime.returns(testScheduler.createColdObservable('-a'));
+
+          clockInWithPosition(user).subscribe(value => {
+            expect(value).to.equal('Socrates has been clocked in.');
+            done();
+          });
+
+          testScheduler.flush();
+        });
       });
     });
   });
